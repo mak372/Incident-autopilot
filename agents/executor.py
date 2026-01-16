@@ -6,6 +6,8 @@ from core.models import (
     IncidentType, IncidentSeverity
 )
 from core.guardrails import GuardrailEngine
+from integrations.retool import RetoolClient
+from integrations.freepik import FreepikClient
 
 
 class ExecutorAgent(BaseAgent):
@@ -14,6 +16,8 @@ class ExecutorAgent(BaseAgent):
     def __init__(self, guardrail_engine: GuardrailEngine):
         super().__init__("Executor")
         self.guardrails = guardrail_engine
+        self.retool = RetoolClient()
+        self.freepik = FreepikClient()
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Propose mitigation based on validated hypothesis."""
@@ -49,11 +53,33 @@ class ExecutorAgent(BaseAgent):
                 "reason": guardrail_check.reason
             }
         
+        # Send approval request to Retool if needed
+        if mitigation.requires_approval:
+            mitigation_dict = {
+                "type": mitigation.type.value,
+                "description": mitigation.description,
+                "parameters": mitigation.parameters,
+                "risk_level": mitigation.risk_level
+            }
+            approval_sent = self.retool.send_approval_request(incident.id, mitigation_dict)
+            print(f"   📋 Retool approval request sent: {approval_sent}")
+        
+        # Generate incident visualization with Freepik
+        incident_data = {
+            "id": incident.id,
+            "service": incident.service_name,
+            "severity": incident.severity.value,
+            "type": incident.incident_type.value
+        }
+        visual_url = self.freepik.generate_incident_card(incident_data)
+        print(f"   🎨 Generated incident visualization: {visual_url}")
+        
         return {
             "mitigation": mitigation,
             "guardrail_check": guardrail_check,
             "status": "proposed",
-            "requires_approval": mitigation.requires_approval
+            "requires_approval": mitigation.requires_approval,
+            "visual_url": visual_url
         }
     
     def _propose_mitigation(self, incident_type: IncidentType, 

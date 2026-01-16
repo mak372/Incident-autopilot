@@ -3,6 +3,7 @@ import random
 from typing import Dict, Any, Tuple
 from datetime import datetime, timedelta
 from core.models import Incident, IncidentType, IncidentSeverity
+from integrations.tonic import TonicClient
 
 
 class IncidentSimulator:
@@ -16,6 +17,7 @@ class IncidentSimulator:
             "notification-service",
             "analytics-service"
         ]
+        self.tonic = TonicClient()
     
     def generate_incident(self, incident_type: str = None) -> Tuple[Incident, Dict[str, Any], Dict[str, Any]]:
         """Generate a realistic incident with metrics.
@@ -192,7 +194,25 @@ class IncidentSimulator:
         return incident, current_metrics, baseline_metrics
     
     def generate_normal_metrics(self, service: str = None) -> Dict[str, float]:
-        """Generate normal/healthy metrics."""
+        """Generate normal/healthy metrics using Tonic AI."""
+        # Try to use Tonic API for realistic synthetic data
+        tonic_data = self.tonic.generate_metrics_dataset("normal", duration_minutes=60)
+        
+        if tonic_data and len(tonic_data) > 0:
+            # Use the latest data point from Tonic
+            latest = tonic_data[-1]
+            return {
+                "latency_p50": latest.get("latency_p50", random.uniform(80, 150)),
+                "latency_p95": latest.get("latency_p95", random.uniform(180, 280)),
+                "latency_p99": latest.get("latency_p99", random.uniform(300, 500)),
+                "error_rate": latest.get("error_rate", random.uniform(0.01, 0.2)),
+                "cpu_usage": latest.get("cpu_usage", random.uniform(30, 60)),
+                "memory_usage": latest.get("memory_usage", random.uniform(40, 70)),
+                "request_rate": latest.get("request_rate", random.uniform(80, 200)),
+                "queue_depth": latest.get("queue_depth", random.uniform(10, 100))
+            }
+        
+        # Fallback to random generation if Tonic unavailable
         return {
             "latency_p50": random.uniform(80, 150),
             "latency_p95": random.uniform(180, 280),

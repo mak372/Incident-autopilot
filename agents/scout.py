@@ -4,6 +4,8 @@ from typing import Dict, Any
 from datetime import datetime, timedelta
 from .base import BaseAgent
 from core.models import Evidence
+from integrations.tinyfish import TinyfishClient
+from integrations.tonic import TonicClient
 
 
 class ScoutAgent(BaseAgent):
@@ -11,6 +13,8 @@ class ScoutAgent(BaseAgent):
     
     def __init__(self):
         super().__init__("Scout")
+        self.tinyfish = TinyfishClient()
+        self.tonic = TonicClient()
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Gather all available evidence about the incident."""
@@ -98,8 +102,16 @@ class ScoutAgent(BaseAgent):
     
     async def _fetch_runbooks(self, service_name: str) -> Dict[str, str]:
         """Fetch runbooks using TinyFish/Yutori web agent."""
-        # In production, integrate with TinyFish API to scrape internal wiki
-        # or external documentation
+        # Try to fetch actual runbooks from TinyFish API
+        incident_type = "general"  # This would be more specific in practice
+        runbooks = self.tinyfish.fetch_runbook(service_name, incident_type)
+        
+        if runbooks:
+            print(f"   📚 Fetched runbooks from TinyFish API")
+            return runbooks
+        
+        # Fallback to default runbooks if API unavailable
+        print(f"   ℹ️  Using default runbooks (TinyFish API unavailable)")
         return {
             "high_latency": "Check database connection pool, review recent queries, check for long-running transactions",
             "high_error_rate": "Check dependency health, review recent deployments, check for configuration changes",
