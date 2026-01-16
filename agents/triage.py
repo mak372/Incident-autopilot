@@ -103,7 +103,7 @@ Respond in JSON format:
 {{"type": "latency_spike", "confidence": 0.9, "reasoning": "explanation"}}"""
 
         message = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model="claude-3-opus-20240229",  # Use Claude 3 Opus (most reliable)
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
