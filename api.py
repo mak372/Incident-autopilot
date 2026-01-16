@@ -160,6 +160,35 @@ async def get_active_incidents():
     }
 
 
+@app.get("/api/dashboard/retool")
+async def get_retool_info():
+    """Get Retool dashboard integration information."""
+    return {
+        "dashboard_name": "Incident Autopilot Dashboard",
+        "description": "Enterprise control tower built with Retool",
+        "api_base_url": f"http://localhost:{os.getenv('INCIDENT_AUTOPILOT_PORT', 8000)}/api",
+        "features": [
+            "Real-time incident monitoring",
+            "Statistics dashboard with key metrics",
+            "Interactive incident timeline",
+            "One-click incident simulation",
+            "Approval workflows",
+            "Auto-refresh every 5 seconds",
+            "Sortable and searchable incident table",
+            "Color-coded severity and status badges"
+        ],
+        "endpoints": {
+            "statistics": "/api/statistics",
+            "incidents": "/api/incidents",
+            "incident_detail": "/api/incidents/{incident_id}",
+            "simulate": "/api/incidents/simulate",
+            "approve": "/api/incidents/{incident_id}/approve"
+        },
+        "setup_guide": "/dashboard/RETOOL_SETUP.md",
+        "configuration_file": "/dashboard/retool_dashboard.json"
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("INCIDENT_AUTOPILOT_PORT", 8000))

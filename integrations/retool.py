@@ -5,18 +5,20 @@ Retool provides the enterprise UI layer for:
 - Approval workflows for mitigations
 - Run history and audit logs
 - Evidence visualization
+- Real-time dashboard with statistics and timeline
 """
 import os
 import requests
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 
 class RetoolClient:
     """Client for Retool API integration."""
     
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: str = None, workspace_url: str = None):
         self.api_key = api_key or os.getenv("RETOOL_API_KEY", "")
+        self.workspace_url = workspace_url or os.getenv("RETOOL_WORKSPACE_URL", "https://mycompany.retool.com")
         self.base_url = "https://api.retool.com/v1"
     
     def create_incident_dashboard(self, incident_data: Dict[str, Any]) -> str:
@@ -105,4 +107,96 @@ class RetoolClient:
         """
         # In production, query Retool API
         return "approved"  # Auto-approve for demo
+    
+    def push_dashboard_data(self, data_type: str, data: Dict[str, Any]) -> bool:
+        """Push data to Retool dashboard via API.
+        
+        Args:
+            data_type: Type of data ('statistics', 'incidents', 'timeline')
+            data: Data payload to push
+            
+        Returns:
+            True if data was pushed successfully
+        """
+        if not self.api_key:
+            print(f"   ℹ️ [RETOOL] Dashboard data ready: {data_type}")
+            return True
+        
+        try:
+            # Push to Retool resource/query
+            resource_url = f"{self.base_url}/resources/data"
+            
+            response = requests.post(
+                resource_url,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "resource": f"incident_autopilot_{data_type}",
+                    "data": data,
+                    "timestamp": datetime.utcnow().isoformat()
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                print(f"   ✅ [RETOOL] Pushed {data_type} to dashboard")
+                return True
+            else:
+                print(f"   ⚠️ [RETOOL] Failed to push {data_type}: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"   ⚠️ [RETOOL] Error pushing {data_type}: {e}")
+            return False
+    
+    def get_dashboard_url(self, incident_id: Optional[str] = None) -> str:
+        """Get URL to the Retool dashboard.
+        
+        Args:
+            incident_id: Optional incident ID to link directly to
+            
+        Returns:
+            URL to the Retool dashboard
+        """
+        if incident_id:
+            return f"{self.workspace_url}/apps/incident-autopilot?incidentId={incident_id}"
+        return f"{self.workspace_url}/apps/incident-autopilot"
+    
+    def create_dashboard_resources(self) -> Dict[str, str]:
+        """Generate configuration for Retool dashboard resources.
+        
+        Returns:
+            Dictionary mapping resource names to their configurations
+        """
+        return {
+            "incident_api": {
+                "type": "restapi",
+                "name": "Incident Autopilot API",
+                "base_url": "http://localhost:8000/api",
+                "endpoints": {
+                    "statistics": "/statistics",
+                    "incidents": "/incidents",
+                    "incident_detail": "/incidents/{{incidentId}}",
+                    "simulate": "/incidents/simulate"
+                }
+            },
+            "statistics_query": {
+                "type": "query",
+                "resource": "incident_api",
+                "method": "GET",
+                "path": "/statistics",
+                "run_when_page_loads": True,
+                "refresh_interval": 5000
+            },
+            "incidents_query": {
+                "type": "query",
+                "resource": "incident_api",
+                "method": "GET",
+                "path": "/incidents",
+                "run_when_page_loads": True,
+                "refresh_interval": 5000
+            }
+        }
 

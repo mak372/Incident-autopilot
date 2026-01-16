@@ -30,6 +30,13 @@ python3 main.py --mode server
 
 **That's it!** No API keys needed. Works out of the box.
 
+### 📊 Two Dashboard Options Available:
+
+1. **HTML Dashboard** (Built-in) - Opens at http://localhost:8000
+2. **Retool Dashboard** (Enterprise) - Import `dashboard/retool_dashboard.json`
+   
+   See [dashboard/README.md](dashboard/README.md) for details on both options!
+
 📖 **Detailed setup guide:** See [INSTALL.md](INSTALL.md)
 
 ---
@@ -74,13 +81,13 @@ Most incident tools just **detect and page**. We close the entire loop:
 
 ## 🎨 Sponsor Tool Integration
 
-| Tool | Purpose |
-|------|---------|
-| **Retool** | Incident Control Tower UI (alerts, approvals, history) |
-| **TinyFish/Yutori** | Scout agent for pulling runbooks/docs from web |
-| **Tonic** | Generate realistic incident datasets for reliable demos |
-| **Freepik** | Generate incident card visuals & timeline graphics |
-| **Cline** | Accelerate building simulator & agent orchestration |
+| Tool | Purpose | Implementation |
+|------|---------|----------------|
+| **Retool** | Incident Control Tower UI (alerts, approvals, history) | Full dashboard with real-time data, approval workflows, and timeline visualization. See `dashboard/retool_dashboard.json` |
+| **TinyFish/Yutori** | Scout agent for pulling runbooks/docs from web | Web scraping for incident documentation |
+| **Tonic** | Generate realistic incident datasets for reliable demos | Synthetic data generation for testing |
+| **Freepik** | Generate incident card visuals & timeline graphics | Visual assets for reports |
+| **Cline** | Accelerate building simulator & agent orchestration | Development productivity |
 
 ## 📈 Metrics We Track
 
