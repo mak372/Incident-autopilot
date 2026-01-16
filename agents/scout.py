@@ -4,7 +4,7 @@ from typing import Dict, Any
 from datetime import datetime, timedelta
 from .base import BaseAgent
 from core.models import Evidence
-from integrations.tinyfish import TinyfishClient
+from integrations.tinyfish import TinyFishClient
 from integrations.tonic import TonicClient
 
 
@@ -13,7 +13,7 @@ class ScoutAgent(BaseAgent):
     
     def __init__(self):
         super().__init__("Scout")
-        self.tinyfish = TinyfishClient()
+        self.tinyfish = TinyFishClient()
         self.tonic = TonicClient()
     
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
