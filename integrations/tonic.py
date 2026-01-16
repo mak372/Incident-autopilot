@@ -20,7 +20,7 @@ class TonicClient:
         self.base_url = "https://api.tonic.ai/v1"
     
     def generate_metrics_dataset(self, scenario: str, duration_minutes: int = 60) -> List[Dict[str, Any]]:
-        """Generate realistic time-series metrics for a scenario.
+        """Generate realistic time-series metrics for a scenario using Tonic AI.
         
         Args:
             scenario: Type of scenario (latency_spike, error_rate, etc.)
@@ -29,9 +29,51 @@ class TonicClient:
         Returns:
             List of metric data points with timestamps
         """
-        # In production, use Tonic to generate statistically realistic data
-        # For demo, generate simulated metrics
+        # Try Tonic API first if available
+        if self.api_key:
+            try:
+                return self._generate_with_tonic_api(scenario, duration_minutes)
+            except Exception as e:
+                print(f"[TONIC] API failed, using local generation: {e}")
         
+        # Fallback to local generation
+        return self._generate_locally(scenario, duration_minutes)
+    
+    def _generate_with_tonic_api(self, scenario: str, duration_minutes: int) -> List[Dict[str, Any]]:
+        """Generate data using Tonic API."""
+        import requests
+        
+        response = requests.post(
+            f"{self.base_url}/generate",
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "dataType": "timeseries",
+                "schema": {
+                    "latency_p50": "float",
+                    "latency_p95": "float", 
+                    "latency_p99": "float",
+                    "error_rate": "float",
+                    "cpu_usage": "float",
+                    "memory_usage": "float",
+                    "request_rate": "float"
+                },
+                "count": duration_minutes,
+                "scenario": scenario
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            print(f"[TONIC] ✅ Generated {duration_minutes} data points via API")
+            return response.json().get("data", [])
+        else:
+            raise Exception(f"Tonic API returned {response.status_code}")
+    
+    def _generate_locally(self, scenario: str, duration_minutes: int) -> List[Dict[str, Any]]:
+        """Local fallback data generation."""
         metrics = []
         now = datetime.utcnow()
         

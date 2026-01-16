@@ -1,5 +1,6 @@
 """Triage Agent: Classifies incident type."""
 import json
+import os
 from typing import Dict, Any
 from .base import BaseAgent
 from core.models import IncidentType, Evidence
@@ -55,10 +56,76 @@ Classify this incident."""
         }
     
     async def _classify_incident(self, evidence: Evidence) -> Dict[str, Any]:
-        """Classify incident using rules or LLM."""
+        """Classify incident using Anthropic Claude or fallback to rules."""
+        
+        # Try Anthropic Claude first if API key is available
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        if anthropic_key:
+            try:
+                return await self._classify_with_anthropic(evidence, anthropic_key)
+            except Exception as e:
+                print(f"[TRIAGE] Anthropic API failed, using rule-based fallback: {e}")
+        
+        # Fallback to rule-based classification
+        return self._classify_with_rules(evidence)
+    
+    async def _classify_with_anthropic(self, evidence: Evidence, api_key: str) -> Dict[str, Any]:
+        """Use Anthropic Claude for classification."""
+        from anthropic import Anthropic
+        
+        client = Anthropic(api_key=api_key)
         metrics = evidence.metrics
         
-        # Rule-based classification for demo reliability
+        prompt = f"""You are an expert SRE triaging a production incident. Classify the incident type.
+
+Metrics:
+- Latency p99: {metrics.get('latency_p99')}ms
+- Error rate: {metrics.get('error_rate')}%
+- CPU usage: {metrics.get('cpu_usage')}%
+- Memory usage: {metrics.get('memory_usage')}%
+- Queue depth: {metrics.get('queue_depth')}
+
+Recent logs:
+{chr(10).join(evidence.logs[:3])}
+
+Classify as ONE of:
+- latency_spike: High p95/p99 latency
+- error_rate_increase: Increased error percentage  
+- resource_saturation: CPU/memory exhaustion
+- queue_depth_growth: Message queue backlog
+
+Respond in JSON format:
+{{"type": "latency_spike", "confidence": 0.9, "reasoning": "explanation"}}"""
+
+        message = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        # Parse Claude's response
+        response_text = message.content[0].text
+        import json
+        result = json.loads(response_text)
+        
+        # Map type string to enum
+        type_map = {
+            "latency_spike": IncidentType.LATENCY_SPIKE,
+            "error_rate_increase": IncidentType.ERROR_RATE,
+            "resource_saturation": IncidentType.RESOURCE_SATURATION,
+            "queue_depth_growth": IncidentType.QUEUE_DEPTH
+        }
+        
+        return {
+            "type": type_map.get(result["type"], IncidentType.UNKNOWN),
+            "confidence": result["confidence"],
+            "reasoning": result["reasoning"]
+        }
+    
+    def _classify_with_rules(self, evidence: Evidence) -> Dict[str, Any]:
+        """Rule-based classification fallback."""
+        metrics = evidence.metrics
+        
         if metrics.get("latency_p99", 0) > 1000:  # >1s
             return {
                 "type": IncidentType.LATENCY_SPIKE,

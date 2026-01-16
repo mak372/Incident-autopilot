@@ -9,6 +9,7 @@ Retool provides the enterprise UI layer for:
 import os
 import requests
 from typing import Dict, Any, List
+from datetime import datetime
 
 
 class RetoolClient:
@@ -32,7 +33,7 @@ class RetoolClient:
         return f"https://mycompany.retool.com/apps/incident-{incident_data['id']}"
     
     def send_approval_request(self, incident_id: str, mitigation: Dict[str, Any]) -> bool:
-        """Send approval request to Retool UI.
+        """Send approval request to Retool Workflow.
         
         Args:
             incident_id: ID of the incident
@@ -41,10 +42,44 @@ class RetoolClient:
         Returns:
             True if approval request was sent successfully
         """
-        print(f"[RETOOL] Approval request sent for incident {incident_id}")
-        print(f"[RETOOL] Mitigation: {mitigation['type']}")
-        print(f"[RETOOL] View at: https://mycompany.retool.com/apps/incident-{incident_id}")
-        return True
+        if not self.api_key:
+            print(f"[RETOOL] No API key - simulating approval request for incident {incident_id}")
+            print(f"[RETOOL] Mitigation: {mitigation.get('type', 'unknown')}")
+            return True
+        
+        try:
+            # Real Retool Workflows API call
+            workflow_url = f"{self.base_url}/workflows/trigger"
+            
+            response = requests.post(
+                workflow_url,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "workflowId": os.getenv("RETOOL_WORKFLOW_ID", "incident-approval"),
+                    "data": {
+                        "incident_id": incident_id,
+                        "mitigation_type": mitigation.get('type', 'unknown'),
+                        "description": mitigation.get('description', ''),
+                        "risk_level": mitigation.get('risk_level', 'unknown'),
+                        "timestamp": datetime.utcnow().isoformat()
+                    }
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                print(f"[RETOOL] ✅ Approval request sent successfully for {incident_id}")
+                return True
+            else:
+                print(f"[RETOOL] ⚠️ API returned status {response.status_code}")
+                return False
+                
+        except Exception as e:
+            print(f"[RETOOL] ❌ API call failed: {e}")
+            return False
     
     def log_incident_event(self, incident_id: str, event: Dict[str, Any]):
         """Log an incident event to Retool for audit trail.

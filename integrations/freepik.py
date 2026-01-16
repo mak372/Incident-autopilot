@@ -7,6 +7,7 @@ Freepik provides visual assets for:
 - Dashboard icons and illustrations
 """
 import os
+import requests
 from typing import Dict, Optional
 
 
@@ -18,7 +19,7 @@ class FreepikClient:
         self.base_url = "https://api.freepik.com/v1"
     
     def generate_incident_card(self, incident_data: Dict) -> str:
-        """Generate a visual incident card with timeline.
+        """Generate a visual incident card with timeline using Freepik AI.
         
         Args:
             incident_data: Incident details for visualization
@@ -26,11 +27,44 @@ class FreepikClient:
         Returns:
             URL or path to generated image
         """
-        # In production, use Freepik API to generate custom graphics
-        # For demo, return placeholder
+        if not self.api_key:
+            incident_id = incident_data.get("id", "unknown")
+            print(f"[FREEPIK] No API key - returning placeholder for {incident_id}")
+            return f"https://cdn.freepik.com/incident-cards/{incident_id}.png"
         
-        incident_id = incident_data.get("id", "unknown")
-        return f"https://cdn.freepik.com/incident-cards/{incident_id}.png"
+        try:
+            # Real Freepik API call for AI image generation
+            incident_type = incident_data.get("type", "incident")
+            severity = incident_data.get("severity", "high")
+            
+            prompt = f"Technical incident alert card, {severity} severity {incident_type}, minimalist infographic style, red and orange gradient"
+            
+            response = requests.post(
+                f"{self.base_url}/ai/text-to-image",
+                headers={
+                    "x-freepik-api-key": self.api_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "prompt": prompt,
+                    "num_images": 1,
+                    "image_size": "square_1_1"
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                image_url = result.get("data", [{}])[0].get("url", "")
+                print(f"[FREEPIK] ✅ Generated incident card: {image_url}")
+                return image_url
+            else:
+                print(f"[FREEPIK] ⚠️ API returned {response.status_code}")
+                return f"https://cdn.freepik.com/fallback.png"
+                
+        except Exception as e:
+            print(f"[FREEPIK] ❌ API call failed: {e}")
+            return f"https://cdn.freepik.com/error.png"
     
     def generate_timeline_graphic(self, timeline_events: list) -> str:
         """Generate a visual timeline of incident progression.
