@@ -61,10 +61,15 @@ Classify this incident."""
         # Try Anthropic Claude first if API key is available
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
         if anthropic_key:
+            print(f"   🔑 [TRIAGE] Anthropic API key detected, attempting AI classification...")
             try:
-                return await self._classify_with_anthropic(evidence, anthropic_key)
+                result = await self._classify_with_anthropic(evidence, anthropic_key)
+                print(f"   ✅ [TRIAGE] Using Anthropic Claude AI for classification")
+                return result
             except Exception as e:
-                print(f"[TRIAGE] Anthropic API failed, using rule-based fallback: {e}")
+                print(f"   ⚠️ [TRIAGE] Anthropic API failed, using rule-based fallback: {e}")
+        else:
+            print(f"   ℹ️ [TRIAGE] No Anthropic API key found, using rule-based classification")
         
         # Fallback to rule-based classification
         return self._classify_with_rules(evidence)

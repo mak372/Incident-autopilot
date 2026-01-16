@@ -31,10 +31,15 @@ class TonicClient:
         """
         # Try Tonic API first if available
         if self.api_key:
+            print(f"   🔑 [TONIC] API key detected, calling Tonic API for synthetic data...")
             try:
-                return self._generate_with_tonic_api(scenario, duration_minutes)
+                result = self._generate_with_tonic_api(scenario, duration_minutes)
+                print(f"   ✅ [TONIC] Successfully generated data via REAL Tonic API!")
+                return result
             except Exception as e:
-                print(f"[TONIC] API failed, using local generation: {e}")
+                print(f"   ⚠️ [TONIC] API failed, using local generation: {e}")
+        else:
+            print(f"   ℹ️ [TONIC] No API key, using local synthetic data generation")
         
         # Fallback to local generation
         return self._generate_locally(scenario, duration_minutes)

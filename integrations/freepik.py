@@ -29,8 +29,10 @@ class FreepikClient:
         """
         if not self.api_key:
             incident_id = incident_data.get("id", "unknown")
-            print(f"[FREEPIK] No API key - returning placeholder for {incident_id}")
+            print(f"   ℹ️ [FREEPIK] No API key - returning placeholder image")
             return f"https://cdn.freepik.com/incident-cards/{incident_id}.png"
+        
+        print(f"   🔑 [FREEPIK] API key detected, generating AI image...")
         
         try:
             # Real Freepik API call for AI image generation
@@ -56,14 +58,15 @@ class FreepikClient:
             if response.status_code == 200:
                 result = response.json()
                 image_url = result.get("data", [{}])[0].get("url", "")
-                print(f"[FREEPIK] ✅ Generated incident card: {image_url}")
+                print(f"   ✅ [FREEPIK] Successfully generated AI image via REAL API!")
+                print(f"   🖼️  [FREEPIK] Image URL: {image_url}")
                 return image_url
             else:
-                print(f"[FREEPIK] ⚠️ API returned {response.status_code}")
+                print(f"   ⚠️ [FREEPIK] API returned {response.status_code}, using placeholder")
                 return f"https://cdn.freepik.com/fallback.png"
                 
         except Exception as e:
-            print(f"[FREEPIK] ❌ API call failed: {e}")
+            print(f"   ⚠️ [FREEPIK] API call failed: {e}")
             return f"https://cdn.freepik.com/error.png"
     
     def generate_timeline_graphic(self, timeline_events: list) -> str:

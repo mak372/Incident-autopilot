@@ -43,9 +43,11 @@ class RetoolClient:
             True if approval request was sent successfully
         """
         if not self.api_key:
-            print(f"[RETOOL] No API key - simulating approval request for incident {incident_id}")
-            print(f"[RETOOL] Mitigation: {mitigation.get('type', 'unknown')}")
+            print(f"   ℹ️ [RETOOL] No API key - simulating approval request for incident {incident_id}")
+            print(f"   📋 [RETOOL] Mitigation: {mitigation.get('type', 'unknown')}")
             return True
+        
+        print(f"   🔑 [RETOOL] API key detected, sending real approval request...")
         
         try:
             # Real Retool Workflows API call
@@ -71,14 +73,15 @@ class RetoolClient:
             )
             
             if response.status_code == 200:
-                print(f"[RETOOL] ✅ Approval request sent successfully for {incident_id}")
+                print(f"   ✅ [RETOOL] Successfully sent approval request via REAL API to workflow!")
+                print(f"   🎯 [RETOOL] Incident {incident_id} approval logged in Retool")
                 return True
             else:
-                print(f"[RETOOL] ⚠️ API returned status {response.status_code}")
+                print(f"   ⚠️ [RETOOL] API returned status {response.status_code}, using fallback")
                 return False
                 
         except Exception as e:
-            print(f"[RETOOL] ❌ API call failed: {e}")
+            print(f"   ⚠️ [RETOOL] API call failed: {e}")
             return False
     
     def log_incident_event(self, incident_id: str, event: Dict[str, Any]):
