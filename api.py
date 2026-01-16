@@ -189,6 +189,55 @@ async def get_retool_info():
     }
 
 
+@app.get("/api/retool/config")
+async def get_retool_config():
+    """Get Retool dashboard configuration JSON."""
+    import json
+    config_path = os.path.join(os.path.dirname(__file__), "dashboard", "retool_dashboard.json")
+    try:
+        with open(config_path, "r") as f:
+            config = json.load(f)
+        return config
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load config: {str(e)}")
+
+
+@app.post("/api/retool/import")
+async def import_to_retool():
+    """Generate import instructions and URL for Retool dashboard."""
+    from integrations.retool import RetoolClient
+    import json
+    
+    # Load the dashboard config
+    config_path = os.path.join(os.path.dirname(__file__), "dashboard", "retool_dashboard.json")
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    
+    # Try to use Retool API if credentials available
+    client = RetoolClient()
+    
+    # Build the response with instructions
+    response = {
+        "status": "ready_to_import",
+        "dashboard_config": config,
+        "instructions": {
+            "step_1": "Go to your Retool workspace",
+            "step_2": "Click 'Create new' → 'From JSON/YAML'",
+            "step_3": "Upload the downloaded JSON file",
+            "step_4": "Update API base URL to your server",
+            "step_5": "Click 'Release' to publish"
+        },
+        "quick_links": {
+            "retool_apps": "https://retool.com/apps",
+            "retool_new_app": "https://retool.com/editor/new",
+            "docs": "http://localhost:8000/dashboard/RETOOL_SETUP.md"
+        },
+        "api_base_url": f"http://localhost:{os.getenv('INCIDENT_AUTOPILOT_PORT', 8000)}/api"
+    }
+    
+    return response
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("INCIDENT_AUTOPILOT_PORT", 8000))
