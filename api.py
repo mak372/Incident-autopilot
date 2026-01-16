@@ -36,7 +36,7 @@ async def root():
     """Serve the dashboard."""
     dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard", "index.html")
     if os.path.exists(dashboard_path):
-        with open(dashboard_path, "r") as f:
+        with open(dashboard_path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     return {"message": "Incident Autopilot API", "docs": "/docs"}
 
