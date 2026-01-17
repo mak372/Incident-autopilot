@@ -1,8 +1,8 @@
-# 🚨 Incident Autopilot with Guardrails
+# Reliable buddy
 
 **Agentic Orchestration Hackathon 2026 Submission**
 
-An intelligent multi-agent system that automatically detects, diagnoses, and mitigates incidents in microservices/K8s applications **60x faster than manual response** (45s vs 45min). This is a **shippable product**, not a demo.
+An intelligent multi-agent system that automatically detects, diagnoses, and mitigates incidents in microservices/K8s applications **5x faster than manual response** (45s vs 45min).
 
 ---
 
@@ -27,13 +27,9 @@ python3 main.py --mode demo --incident-type latency_spike
 python3 main.py --mode server
 # Then open: http://localhost:8000
 ```
+.
 
-**That's it!** No API keys needed. Works out of the box.
 
-### 📊 Two Dashboard Options Available:
-
-1. **HTML Dashboard** (Built-in) - Opens at http://localhost:8000
-2. **Retool Dashboard** (Enterprise) - Import `dashboard/retool_dashboard.json`
    
    See [dashboard/README.md](dashboard/README.md) for details on both options!
 
@@ -43,7 +39,7 @@ python3 main.py --mode server
 
 ## 🎯 What Makes This Unique
 
-Most incident tools just **detect and page**. We close the entire loop:
+Most incident tools just **detect and page**
 **Detect → Diagnose → Mitigate → Verify → Summarize**
 
 ## 🤖 Multi-Agent Pipeline
@@ -84,10 +80,9 @@ Most incident tools just **detect and page**. We close the entire loop:
 | Tool | Purpose | Implementation |
 |------|---------|----------------|
 | **Retool** | Incident Control Tower UI (alerts, approvals, history) | Full dashboard with real-time data, approval workflows, and timeline visualization. See `dashboard/retool_dashboard.json` |
-| **TinyFish/Yutori** | Scout agent for pulling runbooks/docs from web | Web scraping for incident documentation |
+| **TinyFish**| Scout agent for pulling runbooks/docs from web | Web scraping for incident documentation |
 | **Tonic** | Generate realistic incident datasets for reliable demos | Synthetic data generation for testing |
 | **Freepik** | Generate incident card visuals & timeline graphics | Visual assets for reports |
-| **Cline** | Accelerate building simulator & agent orchestration | Development productivity |
 
 ## 📈 Metrics We Track
 
@@ -182,22 +177,3 @@ incident-autopilot/
 - ✅ **Multi-Agent**: Clear orchestration with specialized agents
 - ✅ **Safety First**: Guardrails prevent dangerous actions
 
-## 📺 Demo Video Script
-
-1. Show dashboard with normal metrics
-2. Trigger simulated incident (latency spike)
-3. Watch agents work: Scout → Triage → Hypothesis → Experiment
-4. Review proposed mitigation (rollback)
-5. Approve action via Retool UI
-6. See metrics recover in real-time
-7. View generated incident report with timeline
-
-## 🔮 Future Enhancements
-
-- Integration with real K8s clusters (kubectl, ArgoCD)
-- ML-based anomaly detection (not just thresholds)
-- Multi-region incident coordination
-- Slack/PagerDuty integration
-- Custom runbook execution
-
-# Hackathon-Project--Agentic-Orchestration
