@@ -10,6 +10,8 @@ from core.models import Incident, AgentStage
 from core.state import incident_store
 from core.pipeline import IncidentPipeline
 from simulator.scenarios import IncidentSimulator
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI(
     title="Incident Autopilot API",
