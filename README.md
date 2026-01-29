@@ -1,4 +1,4 @@
-# 🚨 Incident Autopilot — Agentic Incident Response System
+# Incident Autopilot — Agentic Incident Response System
 
 Incident Autopilot is a **multi-agent, human-in-the-loop incident response system** that simulates how modern SRE / platform teams detect, analyze, and mitigate production incidents.
 
@@ -7,7 +7,7 @@ The system orchestrates **specialized agents** (Scout, Triage, Hypothesis, Exper
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 -  **Agentic architecture** — each stage is handled by a specialized agent
 -  **Evidence-driven reasoning** using metrics, logs, deploy history, and runbooks
@@ -20,7 +20,7 @@ The system orchestrates **specialized agents** (Scout, Triage, Hypothesis, Exper
 
 ---
 
-## 🧱 System Architecture
+## System Architecture
 
 ```text
 Incident Detected
