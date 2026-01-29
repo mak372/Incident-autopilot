@@ -1,11 +1,14 @@
 """FastAPI REST API for Incident Autopilot."""
+import datetime
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import os
-
+import time
+import datetime
+from fastapi import HTTPException
 from core.models import Incident, AgentStage
 from core.state import incident_store
 from core.pipeline import IncidentPipeline
@@ -124,25 +127,102 @@ async def get_incident_summary(incident_id: str):
         "metrics": incident.metrics.dict()
     }
 
-
 @app.post("/api/incidents/{incident_id}/approve")
 async def approve_mitigation(incident_id: str):
-    """Approve a proposed mitigation."""
+    """Approve a proposed mitigation and APPLY it (real human-in-the-loop)."""
     incident = incident_store.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
-    
+
     if not incident.proposed_mitigation:
         raise HTTPException(status_code=400, detail="No mitigation proposed")
-    
+
+    # If already applied, keep idempotent
+    if incident.applied_mitigation:
+        return {
+            "incident_id": incident_id,
+            "status": "already_applied",
+            "mitigation": incident.applied_mitigation.dict(),
+        }
+
+    # 1) Mark approved
     incident.mitigation_approved = True
+    incident.add_timeline_event(
+        "approval",
+        "Human approved proposed mitigation",
+        {"mitigation_type": incident.proposed_mitigation.type.value},
+    )
     incident_store.update_incident(incident_id, incident)
-    
+
+    # 2) Apply mitigation NOW (HITL trigger)
+    approved_at_ts = time.time()
+
+    apply_result = await pipeline.executor.apply_mitigation(
+        incident.proposed_mitigation,
+        incident.service_name,
+    )
+
+    if not apply_result.get("success"):
+        incident.stage = AgentStage.FAILED
+        incident.add_timeline_event("executor", "Mitigation apply failed", apply_result)
+        incident_store.update_incident(incident_id, incident)
+        raise HTTPException(
+            status_code=500,
+            detail=apply_result.get("message", "Mitigation apply failed"),
+        )
+
+    # 3) Update incident state
+    incident.applied_mitigation = incident.proposed_mitigation
+    incident.stage = AgentStage.POSTCHECK
+
+    # ✅ Compute TTM safely
+    # Prefer pipeline_start_ts if you added it in IncidentMetrics; otherwise fall back to "approved_at"
+    start_ts = getattr(incident.metrics, "pipeline_start_ts", 0.0) or approved_at_ts
+    if not incident.metrics.time_to_mitigation_seconds:
+        incident.metrics.time_to_mitigation_seconds = max(0.0, time.time() - start_ts)
+
+    incident.add_timeline_event(
+        "executor",
+        "Mitigation applied after human approval",
+        {
+            "mitigation_type": incident.applied_mitigation.type.value,
+            "applied_at": apply_result.get("applied_at"),
+            "time_to_mitigation": f"{incident.metrics.time_to_mitigation_seconds:.1f}s",
+        },
+    )
+    incident_store.update_incident(incident_id, incident)
+
+    # 4) Run postcheck (finish the pipeline)
+    context = {
+        "incident": incident,
+        "current_metrics": {},  # _run_postcheck will overwrite via _simulate_recovery
+        "baseline_metrics": {},
+        "most_likely_cause": None,
+    }
+
+    incident = await pipeline._run_postcheck(incident, context)
+
+    # Mark completion
+    incident.stage = AgentStage.COMPLETED if incident.metrics_recovered else AgentStage.FAILED
+    incident.end_time = datetime.datetime.utcnow()
+    incident.metrics.mitigation_success = incident.metrics_recovered
+    incident.add_timeline_event(
+        "completed" if incident.metrics_recovered else "failed",
+        "Incident completed after human approval"
+        if incident.metrics_recovered
+        else "Incident failed after human approval",
+    )
+
+    incident_store.update_incident(incident_id, incident)
+
     return {
         "incident_id": incident_id,
-        "status": "approved",
-        "mitigation": incident.proposed_mitigation.dict()
+        "status": "applied" if incident.metrics_recovered else "applied_but_not_recovered",
+        "approved": True,
+        "applied_mitigation": incident.applied_mitigation.dict(),
+        "metrics_recovered": incident.metrics_recovered,
     }
+
 
 
 @app.get("/api/statistics")

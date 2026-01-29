@@ -41,6 +41,9 @@ class GuardrailEngine:
                 policy_violated="reversibility_required"
             )
         
+        if not self.config.get("allow_auto_mitigation", False):
+            mitigation.requires_approval = True
+
         # Check 2: High-risk actions require approval
         if mitigation.type.value in self.config["require_approval_for"]:
             if not self.config["allow_auto_mitigation"]:
