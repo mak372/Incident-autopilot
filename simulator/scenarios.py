@@ -3,7 +3,6 @@ import random
 from typing import Dict, Any, Tuple
 from datetime import datetime, timedelta
 from core.models import Incident, IncidentType, IncidentSeverity
-from integrations.tonic import TonicClient
 
 
 class IncidentSimulator:
@@ -17,7 +16,7 @@ class IncidentSimulator:
             "notification-service",
             "analytics-service"
         ]
-        self.tonic = TonicClient()
+
     
     def generate_incident(self, incident_type: str = None) -> Tuple[Incident, Dict[str, Any], Dict[str, Any]]:
         """Generate a realistic incident with metrics.
