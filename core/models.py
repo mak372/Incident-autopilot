@@ -102,7 +102,7 @@ class Incident(BaseModel):
     service_name: str
     start_time: datetime = Field(default_factory=datetime.utcnow)
     end_time: Optional[datetime] = None
-    
+    pipeline_start_ts: float = 0.0
     # Current state
     stage: AgentStage = AgentStage.DETECTION
     severity: IncidentSeverity = IncidentSeverity.MEDIUM

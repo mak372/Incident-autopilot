@@ -56,17 +56,16 @@ async def simulate_incident(
     auto_approve: bool = True,
     background_tasks: BackgroundTasks = None
 ):
-
     try:
-        # Generate incident
         incident, current_metrics, baseline_metrics = simulator.generate_incident(incident_type)
+        # Persist metrics on the incident (for HITL approve flow)
         incident.current_metrics = current_metrics
         incident.baseline_metrics = baseline_metrics
+        # Track when the pipeline started (for accurate TTM later)
+        incident.pipeline_start_ts = time.time()
+        # Store once
         incident_store.create_incident(incident)
-        
-        # Store incident
-        incident_store.create_incident(incident)
-        
+
         # Run pipeline in background
         background_tasks.add_task(
             pipeline.run,
@@ -75,14 +74,12 @@ async def simulate_incident(
             baseline_metrics,
             auto_approve
         )
-        
         return {
             "incident_id": incident.id,
             "service": incident.service_name,
             "status": "processing",
             "message": "Incident pipeline started"
         }
-    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

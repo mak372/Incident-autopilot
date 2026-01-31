@@ -261,8 +261,11 @@ class IncidentPipeline:
         print("[POSTCHECK] Verifying recovery...")
         incident.stage = AgentStage.POSTCHECK
 
-        # Simulate metrics improving after mitigation
-        recovered_metrics = self._simulate_recovery(context.get("current_metrics", {}))
+        baseline = context.get("baseline_metrics", {}) or {}
+        current = context.get("current_metrics", {}) or {}
+
+        # Simulate metrics improving after mitigation (relative to baseline)
+        recovered_metrics = self._simulate_recovery(current, baseline)
         context["current_metrics"] = recovered_metrics
 
         result = await self.postcheck.execute(context)
@@ -271,6 +274,7 @@ class IncidentPipeline:
 
         incident.add_timeline_event("postcheck", "Recovery verification complete", {
             "recovered": result["metrics_recovered"],
+            "checks": result.get("recovery_details", {}).get("checks", {}),
         })
 
         if result["metrics_recovered"]:
@@ -283,17 +287,26 @@ class IncidentPipeline:
         incident_store.update_incident(incident.id, incident)
         return incident
 
-    def _simulate_recovery(self, current_metrics: Dict[str, float]) -> Dict[str, float]:
-        """Simulate metrics returning to normal after mitigation."""
+
+    def _simulate_recovery(self,current_metrics: Dict[str, float],baseline_metrics: Dict[str, float],):
+   
+    # Baselines with safe defaults
+        b_p50 = float(baseline_metrics.get("latency_p50", 120))
+        b_p95 = float(baseline_metrics.get("latency_p95", 200))
+        b_p99 = float(baseline_metrics.get("latency_p99", 250))
+        b_err = float(baseline_metrics.get("error_rate", 0.05))
+
+        # Target recovered values that satisfy your checks
+        recovered_p99 = b_p99 * 1.10      # within 20%
+        recovered_err = b_err * 1.50      # within 2x
+
         return {
-            "latency_p50": 150,
-            "latency_p95": 250,
-            "latency_p99": 400,
-            "error_rate": 0.2,
+            "latency_p50": b_p50 * 1.05,
+            "latency_p95": b_p95 * 1.10,
+            "latency_p99": recovered_p99,
+            "error_rate": recovered_err,
             "cpu_usage": 45,
             "memory_usage": 60,
-            "request_rate": current_metrics.get("request_rate", 100),
-            "queue_depth": 50,
+            "request_rate": float(current_metrics.get("request_rate", 100)),
+            "queue_depth": float(current_metrics.get("queue_depth", 50)),
         }
-    
-    
