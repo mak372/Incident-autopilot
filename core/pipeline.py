@@ -45,10 +45,10 @@ class IncidentPipeline:
         incident_store.update_incident(incident.id, incident)
 
         context = {
-            "incident": incident,
-            "current_metrics": current_metrics,
-            "baseline_metrics": baseline_metrics,
-            "detection_start": detection_start,  # used for time_to_mitigation calc
+        "incident": incident,
+        "current_metrics": incident.current_metrics or current_metrics,
+        "baseline_metrics": incident.baseline_metrics or baseline_metrics,
+        "detection_start": detection_start,
         }
 
         try:

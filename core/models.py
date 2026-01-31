@@ -119,6 +119,8 @@ class Incident(BaseModel):
     mitigation_approved: bool = False
     metrics_recovered: bool = False
     incident_summary: str = ""
+    baseline_metrics: Dict[str, Any] = Field(default_factory=dict)
+    current_metrics: Dict[str, Any] = Field(default_factory=dict)
     
     # Metrics
     metrics: IncidentMetrics = Field(default_factory=IncidentMetrics)

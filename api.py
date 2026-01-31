@@ -60,6 +60,9 @@ async def simulate_incident(
     try:
         # Generate incident
         incident, current_metrics, baseline_metrics = simulator.generate_incident(incident_type)
+        incident.current_metrics = current_metrics
+        incident.baseline_metrics = baseline_metrics
+        incident_store.create_incident(incident)
         
         # Store incident
         incident_store.create_incident(incident)
@@ -182,10 +185,10 @@ async def approve_mitigation(incident_id: str):
     incident_store.update_incident(incident_id, incident)
 
     context = {
-        "incident": incident,
-        "current_metrics": {},
-        "baseline_metrics": {},
-        "most_likely_cause": None,
+    "incident": incident,
+    "current_metrics": incident.current_metrics,
+    "baseline_metrics": incident.baseline_metrics,
+    "most_likely_cause": None
     }
 
     incident = await pipeline._run_postcheck(incident, context)
