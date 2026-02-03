@@ -90,7 +90,6 @@ Incident Detected
   <tr>
     <th>Agent</th>
     <th>Responsibility</th>
-    <th>LLM Usage</th>
   </tr>
   <tr>
     <td><strong>Scout</strong></td>
