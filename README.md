@@ -98,13 +98,11 @@ Incident Detected
   </tr>
   <tr>
     <td><strong>Triage</strong></td>
-    <td>Classifies incident type and severity using evidence and runbooks</td>
-    <td>LLM-assisted classification with rule-based fallback</td>
+    <td>Classifies incident type and severity using evidence and runbooks (LLM-assisted root cause reasoning with deterministic fallback)</td>
   </tr>
   <tr>
     <td><strong>Hypothesis</strong></td>
-    <td>Generates and ranks root-cause hypotheses</td>
-    <td>LLM-assisted root cause reasoning with deterministic fallback</td>
+    <td>Generates and ranks root-cause hypotheses (LLM-assisted root cause reasoning with deterministic fallback)</td>
   </tr>
   <tr>
     <td><strong>Experiment</strong></td>
