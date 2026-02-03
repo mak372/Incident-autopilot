@@ -1,9 +1,15 @@
-<h1>🚨 Incident Autopilot — Agentic Incident Response System</h1>
+<h1>Incident Autopilot — Agentic Incident Response System</h1>
 
 <p>
 <strong>Incident Autopilot</strong> is a <strong>multi-agent, human-in-the-loop incident response system</strong>
 that simulates how modern SRE and platform teams
 <strong>detect, analyze, and mitigate production incidents</strong>.
+</p>
+<h3>Live Demo</h3>
+<p>
+<a href="https://incident-autopilot.onrender.com/" target="_blank">
+https://incident-autopilot.onrender.com/
+</a>
 </p>
 
 <p>
@@ -15,7 +21,7 @@ incident handling — while enforcing <strong>safety guardrails</strong> and ena
 
 <hr/>
 
-<h2>🧠 Problem Statement</h2>
+<h2>Problem Statement</h2>
 
 <p>
 Real-world incident response is not a single decision — it is a sequence of
@@ -31,7 +37,7 @@ and coordinate safely with humans.
 
 <hr/>
 
-<h2>✨ Key Features</h2>
+<h2>Key Features</h2>
 
 <ul>
   <li><strong>Agentic architecture</strong> — each incident stage handled by a dedicated agent</li>
@@ -46,7 +52,7 @@ and coordinate safely with humans.
 
 <hr/>
 
-<h2>🏗️ System Architecture</h2>
+<h2>System Architecture</h2>
 
 <pre>
 Incident Detected
@@ -78,7 +84,7 @@ Incident Detected
 
 <hr/>
 
-<h2>🤖 Agents Overview</h2>
+<h2>Agents Overview</h2>
 
 <table border="1" cellpadding="6" cellspacing="0">
   <tr>
@@ -113,7 +119,7 @@ Incident Detected
 
 <hr/>
 
-<h2>🛡️ Safety & Guardrails</h2>
+<h2>Safety & Guardrails</h2>
 
 <p>
 The system never blindly executes actions. Guardrails ensure:
@@ -131,7 +137,7 @@ This mirrors real-world SRE safety practices.
 
 <hr/>
 
-<h2>🧑‍💻 Human-in-the-Loop Workflow</h2>
+<h2>Human-in-the-Loop Workflow</h2>
 
 <ol>
   <li>System proposes a mitigation</li>
@@ -144,7 +150,7 @@ This mirrors real-world SRE safety practices.
 
 <hr/>
 
-<h2>🚀 Running the Project</h2>
+<h2>Running the Project</h2>
 
 <h3>Local</h3>
 
@@ -157,43 +163,4 @@ uvicorn api:app --reload
   <li>Dashboard: <code>http://localhost:8000</code></li>
   <li>API Docs: <code>http://localhost:8000/docs</code></li>
 </ul>
-
-<h3>Live Demo</h3>
-
-<p>
-👉 <a href="https://incident-autopilot.onrender.com/" target="_blank">
-https://incident-autopilot.onrender.com/
-</a>
-</p>
-
 <hr/>
-
-<h2>📚 What I Learned</h2>
-
-<ul>
-  <li>Designing <strong>agentic workflows</strong> instead of linear pipelines</li>
-  <li>Building <strong>safe automation</strong> with explicit guardrails</li>
-  <li>Coordinating async orchestration in FastAPI</li>
-  <li>Modeling real SRE decision-making systems</li>
-  <li>Keeping humans in control while leveraging automation</li>
-</ul>
-
-<hr/>
-
-<h2>🔮 Future Improvements</h2>
-
-<ul>
-  <li>LLM-powered triage and hypothesis generation</li>
-  <li>Multi-incident coordination</li>
-  <li>Real metrics/log integrations</li>
-  <li>Policy-driven guardrails</li>
-</ul>
-
-<hr/>
-
-<h2>📌 Project Status</h2>
-
-<p>
-Actively developed as a <strong>personal exploration of agentic systems,
-backend orchestration, and safe automation</strong>.
-</p>
