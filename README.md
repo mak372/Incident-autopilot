@@ -1,4 +1,4 @@
-<h1>Incident Autopilot — Agentic Incident Response System</h1>
+<h1>Incident Autopilot - Agentic Incident Response System</h1>
 
 <p>
 <strong>Incident Autopilot</strong> is a <strong>multi-agent, human-in-the-loop incident response system</strong>
@@ -15,7 +15,7 @@ https://incident-autopilot.onrender.com/
 <p>
 Instead of a monolithic workflow, the system orchestrates
 <strong>specialized agents</strong>, each responsible for a distinct stage of
-incident handling — while enforcing <strong>safety guardrails</strong> and enabling
+incident handling while enforcing <strong>safety guardrails</strong> and enabling
 <strong>human approval</strong> for risky actions.
 </p>
 
@@ -24,7 +24,7 @@ incident handling — while enforcing <strong>safety guardrails</strong> and ena
 <h2>Problem Statement</h2>
 
 <p>
-Real-world incident response is not a single decision — it is a sequence of
+Real-world incident response is not a single decision it is a sequence of
 reasoning steps involving evidence, safety checks, and human judgment.
 Most tooling today focuses on dashboards rather than decision-making systems.
 </p>
@@ -40,7 +40,7 @@ and coordinate safely with humans.
 <h2>Key Features</h2>
 
 <ul>
-  <li><strong>Agentic architecture</strong> — each incident stage handled by a dedicated agent</li>
+  <li><strong>Agentic architecture</strong> each incident stage handled by a dedicated agent</li>
   <li><strong>Evidence-driven reasoning</strong> using metrics, logs, deploy history, and runbooks</li>
   <li><strong>Guardrails engine</strong> to prevent unsafe or irreversible actions</li>
   <li><strong>Human-in-the-loop approval</strong> for high-risk mitigations</li>
