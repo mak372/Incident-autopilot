@@ -90,6 +90,7 @@ Incident Detected
   <tr>
     <th>Agent</th>
     <th>Responsibility</th>
+    <th>LLM Usage</th>
   </tr>
   <tr>
     <td><strong>Scout</strong></td>
@@ -97,25 +98,30 @@ Incident Detected
   </tr>
   <tr>
     <td><strong>Triage</strong></td>
-    <td>Classifies incident type and severity</td>
+    <td>Classifies incident type and severity using evidence and runbooks</td>
+    <td>LLM-assisted classification with rule-based fallback</td>
   </tr>
   <tr>
     <td><strong>Hypothesis</strong></td>
-    <td>Generates root-cause hypotheses</td>
+    <td>Generates and ranks root-cause hypotheses</td>
+    <td>LLM-assisted root cause reasoning with deterministic fallback</td>
   </tr>
   <tr>
     <td><strong>Experiment</strong></td>
-    <td>Validates hypotheses against evidence</td>
+    <td>Validates hypotheses against collected evidence</td>
   </tr>
   <tr>
     <td><strong>Executor</strong></td>
-    <td>Proposes and applies mitigations with guardrails</td>
+    <td>Proposes and applies mitigations under strict guardrails</td>
   </tr>
   <tr>
     <td><strong>Postcheck</strong></td>
-    <td>Verifies recovery and generates incident report</td>
+    <td>Verifies recovery and generates the final incident report</td>
   </tr>
 </table>
+
+<hr/>
+
 
 <hr/>
 
