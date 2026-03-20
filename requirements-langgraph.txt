@@ -1,0 +1,7 @@
+# LangGraph + LangSmith integration
+# Install with: pip install -r requirements-langgraph.txt
+langgraph>=0.2.38
+langsmith>=0.1.77
+langchain-core>=0.2.0
+langchain-anthropic>=0.1.23
+typing-extensions>=4.8.0

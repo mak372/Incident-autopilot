@@ -121,8 +121,12 @@ async def get_incident_summary(incident_id: str):
     }
 
 @app.post("/api/incidents/{incident_id}/approve")
-async def approve_mitigation(incident_id: str):
-    """Approve a proposed mitigation and APPLY it (real human-in-the-loop)."""
+async def approve_mitigation(incident_id: str, background_tasks: BackgroundTasks = None):
+    """Approve a proposed mitigation (human-in-the-loop).
+
+    Resumes the LangGraph pipeline from the approval checkpoint so the
+    executor applies the mitigation and postcheck verifies recovery.
+    """
     incident = incident_store.get_incident(incident_id)
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
@@ -130,7 +134,7 @@ async def approve_mitigation(incident_id: str):
     if not incident.proposed_mitigation:
         raise HTTPException(status_code=400, detail="No mitigation proposed")
 
-    # If already applied, keep idempotent
+    # Idempotent: already applied
     if incident.applied_mitigation:
         return {
             "incident_id": incident_id,
@@ -138,6 +142,7 @@ async def approve_mitigation(incident_id: str):
             "mitigation": incident.applied_mitigation.dict(),
         }
 
+    # Record approval immediately so the UI reflects it
     incident.mitigation_approved = True
     incident.add_timeline_event(
         "approval",
@@ -146,69 +151,15 @@ async def approve_mitigation(incident_id: str):
     )
     incident_store.update_incident(incident_id, incident)
 
-    approved_at_ts = time.time()
-
-    apply_result = await pipeline.executor.apply_mitigation(
-        incident.proposed_mitigation,
-        incident.service_name,
-    )
-
-    if not apply_result.get("success"):
-        incident.stage = AgentStage.FAILED
-        incident.add_timeline_event("executor", "Mitigation apply failed", apply_result)
-        incident_store.update_incident(incident_id, incident)
-        raise HTTPException(
-            status_code=500,
-            detail=apply_result.get("message", "Mitigation apply failed"),
-        )
-
-    # 3) Update incident state
-    incident.applied_mitigation = incident.proposed_mitigation
-    incident.stage = AgentStage.POSTCHECK
-
-    start_ts = getattr(incident.metrics, "pipeline_start_ts", 0.0) or approved_at_ts
-    if not incident.metrics.time_to_mitigation_seconds:
-        incident.metrics.time_to_mitigation_seconds = max(0.0, time.time() - start_ts)
-
-    incident.add_timeline_event(
-        "executor",
-        "Mitigation applied after human approval",
-        {
-            "mitigation_type": incident.applied_mitigation.type.value,
-            "applied_at": apply_result.get("applied_at"),
-            "time_to_mitigation": f"{incident.metrics.time_to_mitigation_seconds:.1f}s",
-        },
-    )
-    incident_store.update_incident(incident_id, incident)
-
-    context = {
-    "incident": incident,
-    "current_metrics": incident.current_metrics,
-    "baseline_metrics": incident.baseline_metrics,
-    "most_likely_cause": None
-    }
-
-    incident = await pipeline._run_postcheck(incident, context)
-
-    # Mark completion
-    incident.stage = AgentStage.COMPLETED if incident.metrics_recovered else AgentStage.FAILED
-    incident.end_time = datetime.datetime.utcnow()
-    incident.metrics.mitigation_success = incident.metrics_recovered
-    incident.add_timeline_event(
-        "completed" if incident.metrics_recovered else "failed",
-        "Incident completed after human approval"
-        if incident.metrics_recovered
-        else "Incident failed after human approval",
-    )
-
-    incident_store.update_incident(incident_id, incident)
+    # Resume the LangGraph graph in the background — executor applies
+    # mitigation and postcheck runs automatically.
+    background_tasks.add_task(pipeline.resume_after_approval, incident_id)
 
     return {
         "incident_id": incident_id,
-        "status": "applied" if incident.metrics_recovered else "applied_but_not_recovered",
+        "status": "resuming",
         "approved": True,
-        "applied_mitigation": incident.applied_mitigation.dict(),
-        "metrics_recovered": incident.metrics_recovered,
+        "message": "Pipeline resumed — mitigation is being applied and postcheck will run automatically",
     }
 
 
