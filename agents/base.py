@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 try:
     from langsmith import traceable as _traceable
 except ImportError:
-    def _traceable(*args, **kwargs):  # no-op if langsmith not installed
+    def _traceable(*args, **kwargs):
         def decorator(fn):
             return fn
         return decorator if args and callable(args[0]) else decorator
