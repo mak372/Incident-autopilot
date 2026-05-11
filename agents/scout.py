@@ -12,8 +12,8 @@ class ScoutAgent(BaseAgent):
 
     def __init__(self):
         super().__init__("Scout")
-        self.doc_fetcher = DocumentFetcher()  # GitHub-based runbooks
-        self.log_fetcher = LogFetcher()       # GitHub-based logs
+        self.doc_fetcher = DocumentFetcher()
+        self.log_fetcher = LogFetcher()       
 
     async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Gather all available evidence about the incident."""

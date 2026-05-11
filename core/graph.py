@@ -23,10 +23,6 @@ from agents.executor import ExecutorAgent
 from agents.postcheck import PostcheckAgent
 
 
-# ---------------------------------------------------------------------------
-# LangGraph state schema
-# ---------------------------------------------------------------------------
-
 class IncidentGraphState(TypedDict):
     incident: Any  # Incident (Pydantic)
     current_metrics: Dict[str, Any]
