@@ -7,7 +7,7 @@ that simulates how modern SRE and platform teams
 </p>
 <h3>Live Demo</h3>
 <p>
-<a href="https://incident-autopilot.onrender.com/" target="_blank">
+<a href="https://agentic-ai-onmm.onrender.com/" target="_blank">
 https://incident-autopilot.onrender.com/
 </a> - The demo currently supports simulated incident scenarios including latency spikes, error rate increases, resource saturation, and queue depth growth.
 </p>
