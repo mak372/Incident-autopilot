@@ -9,7 +9,7 @@ that simulates how modern SRE and platform teams
 <p>
 <a href="https://agentic-ai-onmm.onrender.com/" target="_blank">
 https://incident-autopilot.onrender.com/
-</a> - The demo currently supports simulated incident scenarios including latency spikes, error rate increases, resource saturation, and queue depth growth.
+</a> The demo currently supports simulated incident scenarios including latency spikes, error rate increases, resource saturation, and queue depth growth.
 </p>
 
 <p>
@@ -47,7 +47,7 @@ and coordinate safely with humans.
   <li><strong>Asynchronous orchestration</strong> with FastAPI background tasks</li>
   <li><strong>Live dashboard</strong> for incident timelines and status</li>
   <li><strong>Pluggable intelligence</strong> (rule-based today, LLM-ready)</li>
-  <li><strong>Deterministic incident simulator</strong> — no real infra required</li>
+  <li><strong>Deterministic incident simulator</strong> no real infra required</li>
 </ul>
 
 <hr/>
